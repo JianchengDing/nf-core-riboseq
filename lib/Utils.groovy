@@ -12,8 +12,17 @@ class Utils {
     public static void checkCondaChannels(log) {
         Yaml parser = new Yaml()
         def channels = []
+        def cmd = 'conda config --show channels'
+
+        // Check if micromamba exist
+        def process = "type -P mircomamba".execute() // execute type -P command
+        process.waitFor() // wait for process to finish
+        if (process.exitValue() == 0) { // micromamba exists
+            cmd = 'micromamba config list channels'
+        }
+
         try {
-            def config = parser.load("conda config --show channels".execute().text)
+            def config = parser.load("$cmd".execute().text)
             channels = config.channels
         } catch(NullPointerException | IOException e) {
             log.warn "Could not verify conda channel configuration."
